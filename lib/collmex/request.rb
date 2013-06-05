@@ -58,10 +58,10 @@ module Collmex
 
     def parse_result
       return false unless @response
-      message = @response.keep_if{|r| r.class == Collmex::Api::Message}
       @result = 1
-      message.each do |m|
-        if m.meldungstyp == "E"
+      @response.each do |message|
+        next unless message.class == Collmex::Api::Message
+        if message.meldungstyp == "E"
           @result = 0
         elsif m.meldungstyp == "W" and @result != 0
           @result = 2
