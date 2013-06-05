@@ -9,7 +9,7 @@ class Collmex::Api::CustomerGet < Collmex::Api::Line
       { name: :text, type: :string },
       { name: :faellig_zur_wiedervorlage, type: :integer },
       { name: :plz, type: :string },
-      { name: :adressgruppe, type: :int_arr },
+      { name: :adressgruppe, type: :integer },
       { name: :preisgruppe, type: :integer },
       { name: :rabattgruppe, type: :integer },
       { name: :vermittler, type: :integer },
