@@ -88,6 +88,6 @@ end
 
 require "collmex/api/line"
 
-Dir.entries(File.join(__dir__, "/api")).delete_if{|k| k == 'line.rb'}.each do | line |
+Dir.entries(File.join(File.dirname(__FILE__), "/api")).delete_if{|k| k == 'line.rb'}.each do | line |
   require "collmex/api/#{line}"[0..-4] if line.end_with? ".rb"
 end

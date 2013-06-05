@@ -91,7 +91,7 @@ module Rubify
       end
     end
 
-    def register_all(patch_dir = File.join(__dir__, 'patches'))
+    def register_all(patch_dir = File.join(File.dirname(__FILE__), 'patches'))
       Dir.entries(patch_dir).without("base.rb").each do |file|
         next unless file.end_with? ".rb"
         puts File.join(patch_dir, file)
