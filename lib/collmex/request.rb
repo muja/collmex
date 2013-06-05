@@ -63,7 +63,7 @@ module Collmex
         next unless message.class == Collmex::Api::Message
         if message.meldungstyp == "E"
           @result = 0
-        elsif m.meldungstyp == "W" and @result != 0
+        elsif message.meldungstyp == "W" and @result != 0
           @result = 2
         end
       end
