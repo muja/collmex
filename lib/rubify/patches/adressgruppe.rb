@@ -1,0 +1,1 @@
+register name: :adressgruppe, set_type: :int_arr, classes: ["CustomerGet", "Cmxknd"]

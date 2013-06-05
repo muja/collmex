@@ -1,0 +1,8 @@
+#!/bin/bash
+echo "Backing up line.rb"
+mv line.rb ../line_backup.rb
+echo "Clearing directory"
+rm -rf *.rb
+echo "Restoring line.rb"
+mv ../line_backup.rb ./line.rb
+echo "Done"

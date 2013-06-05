@@ -1,0 +1,7 @@
+#!/bin/bash
+echo Requiring collmex...
+ruby -e "require 'collmex'"
+if [ "$?" == 0 ]
+then
+  echo "All okay!"
+fi
