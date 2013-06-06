@@ -38,7 +38,7 @@ module Collmex::Api
   # a typecasted object
   def self.parse_field(value, type, opts = nil)
     case type
-      when :string    then value.to_s
+      when :string    then value.to_s unless value.nil?
       when :date      then Date.parse(value.to_s) unless value.nil?
       when :int_arr   then value.split(",").map{|i| i.to_i} unless value.nil?
       when :integer   then value.to_i unless value.nil?

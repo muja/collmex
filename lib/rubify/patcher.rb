@@ -65,8 +65,8 @@ module Rubify
         end
 
         patch.each_pair do |k, v|
-          case k
-          when :set_type, :set_const, :set_default
+          case k.to_s
+          when /set_.+/ # set_type, set_const, set_default, set_required
             key = k[4..-1]
             regex = /#{key}:\s*(:|"|')?\S+("|')?/
               ## Warning:

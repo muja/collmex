@@ -41,6 +41,12 @@ class Collmex::Api::Line
     hash
   end
 
+  def valid?
+    self.class.specification.each_with_index do |field_spec, index|
+      return false if field_spec[:required] and field_spec[:name].nil?
+    end
+    true
+  end
 
   def initialize(arg = nil)
     @hash = self.class.default_hash
@@ -75,11 +81,16 @@ class Collmex::Api::Line
     @hash
   end
 
+  def to_s
+    to_csv.chomp
+  end
+
   def method_missing(m, *args, &block)
     if m.to_s.end_with? "="
       @hash[m[0...-1].to_sym] = args.first
     else
-      @hash[m.to_sym] || super
+      super unless @hash.has_key? m.to_sym
+      @hash[m.to_sym]
     end
   end
 end

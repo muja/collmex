@@ -1,10 +1,11 @@
 require "net/http"
 require "uri"
+require_relative "response"
 
 module Collmex
   class Request
+    attr_reader :response
     attr_accessor :commands, :http
-    attr_accessor :debug
 
     def self.run(&block)
       Request.new.tap do |request|
@@ -24,8 +25,7 @@ module Collmex
     end
 
     def initialize
-      @commands     = []
-      @raw_response = {}
+      @commands = []
 
       if Collmex.benutzer and Collmex.passwort and Collmex.kundennummer
         add_command Collmex::Api::Login.new({benutzer: Collmex.benutzer, passwort: Collmex.passwort})
@@ -51,37 +51,23 @@ module Collmex
       @commands.map { |c| c.to_csv }.join
     end
 
-    def parse_response
-      @response = @raw_response[:array].map { |l| Collmex::Api.parse_line(l) }
-      @response
-    end
-
-    def parse_result
-      return false unless @response
-      @result = 1
-      @response.each do |message|
-        next unless message.class == Collmex::Api::Message
-        if message.meldungstyp == "E"
-          @result = 0
-        elsif message.meldungstyp == "W" and @result != 0
-          @result = 2
-        end
-      end
-    end
-
-    def success?
-      @result == 1
-    end
-
+    # @deprecated Please use {Response#errors?} instead
     def raw_response
-      @raw_response
+      @response.raw
     end
 
-    def response
-      @response
+    # @deprecated Please use {Response#errors?} instead
+    # The call `request.success?` is equivalent to the call `!request.response.errors?`
+    # @return
+    # true if the request was executed with no errors returned from Collmex, false otherwise
+    def success?
+      warn "[DEPRECATION] `Request#success?` is deprecated. Please use `!Response#errors?` instead."
+      !@response.errors?
     end
 
     def execute
+      valid_commands = @commands.take_while{|e| e.valid?}
+      raise "#{@commands[valid_commands.size]} is not valid." if valid_commands.size != @commands.size # Some command isn't valid
       @http = Net::HTTP.new(Collmex::Request.uri.host, Collmex::Request.uri.port)
       @http.use_ssl = true
       @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -91,18 +77,17 @@ module Collmex
       response = @http.request_post(Collmex::Request.uri.request_uri, encoded_body, Collmex::Request.header_attributes)
       response.body.force_encoding("ISO-8859-1") if response.body.encoding.to_s == "ASCII-8BIT"
 
-      @raw_response[:string] = response.body.encode("UTF-8")
+      raw_response = {}
+
+      raw_response[:string] = response.body.encode("UTF-8")
 
       begin
-        @raw_response[:array]  = CSV.parse(@raw_response[:string], Collmex.csv_opts)
-      rescue => e
-        $stderr.puts "CSV.parse failed with string: #{@raw_response[:string]}" if self.debug
-        raise e
+        raw_response[:array] = CSV.parse(raw_response[:string], Collmex.csv_opts)
+      rescue
+        raise "CSV.parse failed with string: #{raw_response[:string]}"
       end
 
-      parse_response
-      parse_result
-      success?
+      @response = Collmex::Response.parse_response(raw_response)
     end
   end
 end

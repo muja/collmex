@@ -1,3 +1,5 @@
+require 'class-utils'
+
 module Collmex
   class << self
 
