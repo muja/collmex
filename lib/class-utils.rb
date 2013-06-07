@@ -12,14 +12,15 @@ class String
   end
 
   def camelize
-    gsub(/[\-_\s]+(\w)/){$1.capitalize}
-  end
-
-  def classify
-    s = symbolize.camelize
+    s = gsub(/[\-_\s]+(\w)/){$1.capitalize}
     s[0] = s[0].upcase
     s
   end
+
+  def classify
+    camelize
+  end
+
 end
 
 class Array
