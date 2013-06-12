@@ -1,6 +1,6 @@
 # http://www.collmex.de/cgi-bin/cgi.exe?1005,1,help,daten_importieren_umsaetze
 
-class Collmex::Api::Cmxums < Collmex::Api::Line
+class Collmex::Api::Cmxum < Collmex::Api::Line
   def self.specification
     [
       { name: :satzart, type: :string, const: "CMXUMS" },

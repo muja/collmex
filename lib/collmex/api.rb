@@ -23,7 +23,7 @@ module Collmex::Api
   def self.parse_line(line)
     # in case the line is already an array
     if Array === line && String === line.first || String === line && line = CSV.parse_line(line, Collmex.csv_opts)
-      identifier = line.first.split(/_|-/).map { |s| s.downcase.capitalize }.join
+      identifier = line.first.split(/_|-/).map(&:capitalize).join
       if self.line_class_exists?(identifier)
         Collmex::Api.const_get(identifier).new(line)
       else
@@ -84,10 +84,28 @@ module Collmex::Api
     else data
     end
   end
+
+  def self.api_tree(api_dir = "collmex/api", extension = false)
+    ext = ".rb" unless extension # negated -> for delete
+
+    tree = [File.join(api_dir, "line.rb".delete ext)] # make line.rb the first element!
+
+    Dir.entries(api_dir).without('line.rb').each do | line |
+      tree << File.join(api_dir, line.delete ext) if line.end_with? ".rb"
+    end
+  end
+
+  api_tree.each(&method(:require))
 end
 
-require "collmex/api/line"
-
-Dir.entries(File.join(File.dirname(__FILE__), "/api")).delete_if{|k| k == 'line.rb'}.each do | line |
-  require "collmex/api/#{line}"[0..-4] if line.end_with? ".rb"
+class Regexp
+  def match_all source, &block
+    matches = []
+    while match = self.match source # nil wertet zu false aus, und match liefert nil bei nicht gefunden
+      matches << match
+      yield match if block_given? # falls lambda ausdruck übergeben wurde, führ direkt aus
+      source = source[match.end..-1]
+    end
+    matches
+  end
 end

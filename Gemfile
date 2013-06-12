@@ -2,7 +2,6 @@ source "https://rubygems.org"
 
 gemspec
 
-gem "nokogiri"
 gem "guard"
 gem "guard-rspec"
 gem "guard-bundler"

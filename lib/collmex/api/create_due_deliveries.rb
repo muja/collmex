@@ -1,6 +1,6 @@
 # http://www.collmex.de/cgi-bin/cgi.exe?1005,1,help,api_Faellige_Lieferungen
 
-class Collmex::Api::CreateDueDeliveries < Collmex::Api::Line
+class Collmex::Api::CreateDueDelivery < Collmex::Api::Line
   def self.specification
     [
       { name: :satzart, type: :string, const: "CREATE_DUE_DELIVERIES" },

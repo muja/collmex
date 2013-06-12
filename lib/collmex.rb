@@ -1,5 +1,3 @@
-require 'class-utils'
-
 module Collmex
   class << self
 
@@ -32,3 +30,4 @@ end
 
 require 'collmex/api'
 require 'collmex/request'
+require 'collmex/response'

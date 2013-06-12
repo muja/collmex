@@ -1,93 +1,76 @@
 require "net/http"
 require "uri"
-require_relative "response"
 
-module Collmex
-  class Request
-    attr_reader :response
-    attr_accessor :commands, :http
+class Collmex::Request
+  attr_reader :response
+  attr_accessor :commands, :http
 
-    def self.run(&block)
-      Request.new.tap do |request|
-        request.instance_eval &block if block_given?
-        request.execute
-      end
+  def self.run(&block)
+    Request.new.tap do |request|
+      request.instance_eval &block if block_given?
+      request.execute
+    end
+  end
+
+  def enqueue(command, args = {})
+    if command.is_a? Symbol or command.is_a? String
+      add_command Collmex::Api::const_get(command.to_s.split(/_|-/).map(&:capitalize).join).new(args)
+    elsif Collmex::Api.is_a_collmex_api_line_obj?(command)
+      add_command command
+    else
+      return false
+    end
+  end
+
+  def initialize
+    @commands = []
+
+    if Collmex.benutzer and Collmex.passwort and Collmex.kundennummer
+      add_command Collmex::Api::Login.new(benutzer: Collmex.benutzer, passwort: Collmex.passwort)
+    else
+      raise "No credentials for collmex given"
+    end
+  end
+
+  def add_command(cmd)
+    @commands << cmd
+    cmd
+  end
+
+  def self.uri
+    URI.parse "https://www.collmex.de/cgi-bin/cgi.exe\?#{Collmex.kundennummer},0,data_exchange"
+  end
+
+  def self.header_attributes
+    {"Content-Type" => "text/csv"}
+  end
+
+  def payload
+    @commands.map { |c| c.to_csv }.join
+  end
+
+  def execute
+    valid_commands = @commands.take_while{|e| e.valid?}
+    raise "#{@commands[valid_commands.size]} is not valid." if valid_commands.size != @commands.size # Some command isn't valid
+    @http = Net::HTTP.new(Collmex::Request.uri.host, Collmex::Request.uri.port)
+    @http.use_ssl = true
+    @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+    # http://www.collmex.de/faq.html#zeichensatz_import
+    encoded_body = payload.encode("ISO-8859-1", undef: :replace) # Do not blow up on undefined characters in ISO-8859-1
+    response = @http.request_post(Collmex::Request.uri.request_uri, encoded_body, Collmex::Request.header_attributes)
+    response.body.force_encoding("ISO-8859-1") if response.body.encoding.to_s == "ASCII-8BIT"
+
+    raw_response = {}
+
+    raw_response[:string] = response.body.encode("UTF-8")
+
+    begin
+      raw_response[:array] = CSV.parse(raw_response[:string], Collmex.csv_opts)
+    rescue
+      raise "CSV.parse failed with string: #{raw_response[:string]}"
     end
 
-    def enqueue(command, args = {})
-      if command.is_a? Symbol or command.is_a? String
-        add_command Collmex::Api::const_get(command.to_s.classify).new(args)
-      elsif Collmex::Api.is_a_collmex_api_line_obj?(command)
-        add_command command
-      else
-        return false
-      end
-    end
-
-    def initialize
-      @commands = []
-
-      if Collmex.benutzer and Collmex.passwort and Collmex.kundennummer
-        add_command Collmex::Api::Login.new({benutzer: Collmex.benutzer, passwort: Collmex.passwort})
-      else
-        raise "No credentials for collmex given"
-      end
-    end
-
-    def add_command(cmd)
-      @commands << cmd
-      cmd
-    end
-
-    def self.uri
-      URI.parse "https://www.collmex.de/cgi-bin/cgi.exe\?#{Collmex.kundennummer},0,data_exchange"
-    end
-
-    def self.header_attributes
-      {"Content-Type" => "text/csv"}
-    end
-
-    def payload
-      @commands.map { |c| c.to_csv }.join
-    end
-
-    # @deprecated Please use {Response#errors?} instead
-    def raw_response
-      @response.raw
-    end
-
-    # @deprecated Please use {Response#errors?} instead
-    # The call `request.success?` is equivalent to the call `!request.response.errors?`
-    # @return
-    # true if the request was executed with no errors returned from Collmex, false otherwise
-    def success?
-      warn "[DEPRECATION] `Request#success?` is deprecated. Please use `!Response#errors?` instead."
-      !@response.errors?
-    end
-
-    def execute
-      valid_commands = @commands.take_while{|e| e.valid?}
-      raise "#{@commands[valid_commands.size]} is not valid." if valid_commands.size != @commands.size # Some command isn't valid
-      @http = Net::HTTP.new(Collmex::Request.uri.host, Collmex::Request.uri.port)
-      @http.use_ssl = true
-      @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-
-      # http://www.collmex.de/faq.html#zeichensatz_import
-      encoded_body = payload.encode("ISO-8859-1", undef: :replace) # Do not blow up on undefined characters in ISO-8859-1
-      response = @http.request_post(Collmex::Request.uri.request_uri, encoded_body, Collmex::Request.header_attributes)
-      response.body.force_encoding("ISO-8859-1") if response.body.encoding.to_s == "ASCII-8BIT"
-
-      raw_response = {}
-
-      raw_response[:string] = response.body.encode("UTF-8")
-
-      begin
-        raw_response[:array] = CSV.parse(raw_response[:string], Collmex.csv_opts)
-      rescue
-        raise "CSV.parse failed with string: #{raw_response[:string]}"
-      end
-
-      @response = Collmex::Response.parse_response(raw_response)
-    end
+    @response = Collmex::Response.parse_response(raw_response)
   end
 end

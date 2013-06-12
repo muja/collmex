@@ -48,14 +48,11 @@ class Collmex::Api::Line
     true
   end
 
-  def initialize(arg = nil)
+  def initialize(arg = {})
     @hash = self.class.default_hash
-    @hash = @hash.merge(self.class.hashify(arg)) if !arg.nil?
-    if self.class.specification.empty? && self.class.name.to_s != "Collmex::Api::Line"
-      raise "#{self.class.name} has no specification"
-    end
+    @hash = @hash.merge(self.class.hashify(arg))
+    true
   end
-
 
   def to_a
     array = []
@@ -86,8 +83,9 @@ class Collmex::Api::Line
   end
 
   def method_missing(m, *args, &block)
-    if m.to_s.end_with? "="
-      @hash[m[0...-1].to_sym] = args.first
+    super if args.size > 1 or block_given?
+    if m.to_s.end_with? '='
+      @hash[m.delete('=').to_sym] = args.first
     else
       super unless @hash.has_key? m.to_sym
       @hash[m.to_sym]

@@ -1,6 +1,6 @@
 # http://www.collmex.de/cgi-bin/cgi.exe?1005,1,help,daten_importieren_kundenauftraege
 
-class Collmex::Api::Cmxord2 < Collmex::Api::Line
+class Collmex::Api::Cmxord-2 < Collmex::Api::Line
   def self.specification
     [
       { name: :satzart, type: :string, const: "CMXORD-2" },
