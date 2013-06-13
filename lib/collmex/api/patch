@@ -1,5 +1,5 @@
 #!/usr/local/bin/ruby
 
 puts "Initializing patcher.."
-require "../../rubify/patcher"
+require "rubify/patcher"
 Rubify::Patcher.new.from_scratch

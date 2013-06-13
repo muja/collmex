@@ -88,10 +88,10 @@ module Collmex::Api
   def self.api_tree(api_dir = "collmex/api", extension = false)
     ext = ".rb" unless extension # negated -> for delete
 
-    tree = [File.join(api_dir, "line.rb".delete ext)] # make line.rb the first element!
+    tree = [File.join(api_dir, "line.rb".delete(ext))] # make line.rb the first element!
 
     Dir.entries(api_dir).without('line.rb').each do | line |
-      tree << File.join(api_dir, line.delete ext) if line.end_with? ".rb"
+      tree << File.join(api_dir, line.delete(ext)) if line.end_with? ".rb"
     end
   end
 

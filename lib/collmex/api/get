@@ -6,5 +6,5 @@ unless File.exists? "line.rb"
 end
 system("./clear")
 puts "Rubifying Collmex API..."
-require "../../rubify"
+require "rubify"
 Rubify.rubify_all
