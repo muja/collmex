@@ -97,15 +97,3 @@ module Collmex::Api
 
   api_tree.each(&method(:require))
 end
-
-class Regexp
-  def match_all source, &block
-    matches = []
-    while match = self.match source # nil wertet zu false aus, und match liefert nil bei nicht gefunden
-      matches << match
-      yield match if block_given? # falls lambda ausdruck übergeben wurde, führ direkt aus
-      source = source[match.end..-1]
-    end
-    matches
-  end
-end
