@@ -6,7 +6,7 @@ class Collmex::Request
   attr_accessor :commands, :http
 
   def self.run(&block)
-    Request.new.tap do |request|
+    new.tap do |request|
       request.instance_eval &block if block_given?
       request.execute
     end
