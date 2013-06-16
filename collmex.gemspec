@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'collmex'
-  s.version     = '0.3.9'
+  s.version     = '0.3.10'
   s.date        = '2012-07-29'
   s.summary     = "A ruby api lib for collmex"
   s.description = "A lib written in ruby that talks to the german accounting software collmex."
