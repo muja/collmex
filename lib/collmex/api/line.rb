@@ -85,7 +85,7 @@ class Collmex::Api::Line
   def method_missing(m, *args, &block)
     super if args.size > 1 or block_given?
     if m.to_s.end_with? '='
-      @hash[m.delete('=').to_sym] = args.first
+      @hash[m[0...-1].to_sym] = args.first
     else
       super unless @hash.has_key? m.to_sym
       @hash[m.to_sym]
