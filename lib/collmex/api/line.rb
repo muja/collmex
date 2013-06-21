@@ -75,6 +75,10 @@ class Collmex::Api::Line
   end
 
   def to_h
+    to_hash
+  end
+
+  def to_hash
     @hash
   end
 

@@ -25,6 +25,5 @@ module Collmex
 end
 
 require 'collmex/api'
-require 'collmex/patch'
 require 'collmex/request'
 require 'collmex/response'

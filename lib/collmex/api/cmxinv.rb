@@ -1,25 +1,6 @@
 # http://www.collmex.de/cgi-bin/cgi.exe?1005,1,help,daten_importieren_rechnungen
 
 class Collmex::Api::Cmxinv < Collmex::Api::Line
-  # Rechnungsart
-  RECHNUNG = 0
-  GUTSCHRIFT = 1
-  ABSCHLAGSRECHNUNG = 2
-  BARVERKAUF = 3
-  RETOURENGUTSCHRIFT = 4
-  PROFORMARECHNUNG = 5
-
-  # Produktart
-  WARE = 0
-  DIENSTLEISTUNG = 1
-  MITGLIEDSBEITRAG = 2
-  BAUDIENSTLEISTUNG = 3
-
-  # Steuerklassifikation
-  VOLLER_STEUERSATZ = 0
-  HALBER_STEUERSATZ = 1
-  STEUERFREI = 2
-
   def self.specification
     [
       { name: :satzart, type: :string, const: "CMXINV" },
