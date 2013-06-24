@@ -1,9 +1,4 @@
-#!/usr/local/bin/ruby
-puts "Doing backup of line.rb..."
-unless File.exists? "line.rb"
-	puts "line.rb not found. Did you choose correct directory?"
-	exit 1
-end
+#!/usr/bin/env ruby
 system("./clear")
 puts "Rubifying Collmex API..."
 require "rubify"

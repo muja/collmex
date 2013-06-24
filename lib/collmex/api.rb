@@ -12,10 +12,17 @@ module Collmex::Api
   # Check if a Line class exists for the given class name
   def self.line_class_exists?(class_name)
     klass = Collmex::Api.const_get(class_name)
-    return klass.is_a?(Class)
+    return klass.is_a? Class
   rescue NameError
     return false
   end
+
+  # Retrieve class for given name
+  def self.line_class(class_name)
+    klass = Collmex::Api.const_get(class_name)
+    raise "No such class: Collmex::Api::#{class_name}" unless klass.is_a? Class
+    klass
+  end  
 
   # Parse a line given as a string or array and return
   # a Collmex::Api::Xyz object for it that inherits

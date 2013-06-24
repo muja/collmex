@@ -1,8 +1,8 @@
 class Collmex::Api::Line
+  SPECIFICATION = [{}]
 
-  # Holds the specification of the line object
   def self.specification
-    [{}]
+    self::SPECIFICATION
   end
 
   # Return an empty default-hash of the line.
@@ -39,6 +39,10 @@ class Collmex::Api::Line
       end
     end
     hash
+  end
+
+  def self.method_missing(m, *args, &block)
+    specification.find{|x| x[:name] == m} || super
   end
 
   def valid?
