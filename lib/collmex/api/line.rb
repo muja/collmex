@@ -97,13 +97,21 @@ class Collmex::Api::Line
 
   def method_missing(m, *args, &block)
     super if block_given?
+
     field = m.to_s.split("=").first.to_sym
+
     super unless @hash.key? field
-    if m.to_s.end_with? '='
-      raise ArgumentError("wrong number of arguments (#{args.size} for 1)") if args.size != 1
+
+    assignment = m.to_s.end_with? '='
+
+    args_should = assignment ? 1 : 0
+
+    raise ArgumentError.new("wrong number of arguments (#{args.size} for #{args_should})") if args_should != args.size
+
+    if assignment
+      raise ArgumentError.new("Cannot assign to const field (#{field})") if self.class.send(field).key? :const
       @hash[field] = args.first
     else
-      raise ArgumentError("wrong number of arguments (#{args.size} for 0)") if args.size != 0
       @hash[field]
     end
   end
