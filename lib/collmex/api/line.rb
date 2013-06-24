@@ -14,7 +14,7 @@ class Collmex::Api::Line
       elsif field_spec.has_key? :default
         hash[field_spec[:name]] = field_spec[:default]
       else
-        hash[field_spec[:name]] = Collmex::Api.parse_field(nil, field_spec[:type])
+        hash[field_spec[:name]] = nil
       end
     end
     hash
@@ -23,38 +23,43 @@ class Collmex::Api::Line
   # returns a hash of the line that inherits from the default_hash but gets
   # filled with its contents.
   def self.hashify(data)
-    hash = self.default_hash
-    fields_spec = self.specification
-    if Array === data || String === data && data = CSV.parse_line(data,Collmex.csv_opts)
-      fields_spec.each_with_index do |field_spec, index|
-        unless data[index].nil? or field_spec.has_key? :const
+    hash = default_hash
+    spec = specification
+    if Array === data || String === data && data = CSV.parse_line(data, Collmex.csv_opts)
+      spec.each_with_index do |field_spec, index|
+        if data[index] and not field_spec.has_key? :const
           hash[field_spec[:name]] = Collmex::Api.parse_field(data[index], field_spec[:type])
         end
       end
     elsif Hash === data
-      fields_spec.each_with_index do |field_spec, index|
-        if data.key?(field_spec[:name]) && !field_spec.has_key?(:const)
-          hash[field_spec[:name]] = Collmex::Api.parse_field(data[field_spec[:name]], field_spec[:type])
-        end
+      data.each do |name, value|
+        raise ArgumentError.new("Undefined field (#{name} in #{self.class})") unless hash.key? name
+        spec = self.send(name)
+        raise ArgumentError.new("Cannot override constant! (#{name} in #{self.class})") if spec.key? :const
+        hash[name] = Collmex::Api.parse_field(value, spec[:type])
       end
     end
     hash
   end
 
+  def self.subclasses
+    Collmex::Api.constants.map{|x| Collmex::Api.const_get(x)}.select{|x| x.is_a? Class and x.superclass == self}
+  end
+
   def self.method_missing(m, *args, &block)
+    super if args.size > 0 or block_given?
     specification.find{|x| x[:name] == m} || super
   end
 
   def valid?
-    self.class.specification.each_with_index do |field_spec, index|
-      return false if field_spec[:required] and field_spec[:name].nil?
+    self.class.specification.each do |spec|
+      return false if spec[:required] and @hash[spec[:name]].nil?
     end
     true
   end
 
   def initialize(arg = {})
-    @hash = self.class.default_hash
-    @hash = @hash.merge(self.class.hashify(arg))
+    @hash = self.class.hashify(arg)
     true
   end
 
@@ -91,12 +96,15 @@ class Collmex::Api::Line
   end
 
   def method_missing(m, *args, &block)
-    super if args.size > 1 or block_given?
+    super if block_given?
+    field = m.to_s.split("=").first.to_sym
+    super unless @hash.key? field
     if m.to_s.end_with? '='
-      @hash[m[0...-1].to_sym] = args.first
+      raise ArgumentError("wrong number of arguments (#{args.size} for 1)") if args.size != 1
+      @hash[field] = args.first
     else
-      super unless @hash.has_key? m.to_sym
-      @hash[m.to_sym]
+      raise ArgumentError("wrong number of arguments (#{args.size} for 0)") if args.size != 0
+      @hash[field]
     end
   end
 end

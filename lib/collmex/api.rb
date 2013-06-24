@@ -22,7 +22,7 @@ module Collmex::Api
     klass = Collmex::Api.const_get(class_name)
     raise "No such class: Collmex::Api::#{class_name}" unless klass.is_a? Class
     klass
-  end  
+  end
 
   # Parse a line given as a string or array and return
   # a Collmex::Api::Xyz object for it that inherits
@@ -44,13 +44,14 @@ module Collmex::Api
   # Given a field's content, we parse it here and return
   # a typecasted object
   def self.parse_field(value, type, opts = nil)
+    return nil if value.nil?
     case type
-      when :string    then value.to_s unless value.nil?
-      when :date      then Date.parse(value.to_s) unless value.nil?
-      when :int_arr   then value.split(",").map{|i| i.to_i} unless value.nil?
-      when :integer   then value.to_i unless value.nil?
-      when :float     then value.to_s.gsub(',','.').to_f unless value.nil?
-      when :currency  then Collmex::Api.parse_currency(value) unless value.nil?
+      when :string    then value.to_s
+      when :date      then Date.parse(value.to_s)
+      when :int_arr   then value.split(",").map{|i| i.to_i}
+      when :integer   then value.to_i
+      when :float     then value.to_s.gsub(',','.').to_f
+      when :currency  then Collmex::Api.parse_currency(value)
     end
   end
 
