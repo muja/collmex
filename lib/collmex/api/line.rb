@@ -23,23 +23,23 @@ class Collmex::Api::Line
   # returns a hash of the line that inherits from the default_hash but gets
   # filled with its contents.
   def self.hashify(data)
-    hash = default_hash
+    options = default_hash
     spec = specification
     if Array === data || String === data && data = CSV.parse_line(data, Collmex.csv_opts)
       spec.each_with_index do |field_spec, index|
         if data[index] and not field_spec.has_key? :const
-          hash[field_spec[:name]] = Collmex::Api.parse_field(data[index], field_spec[:type])
+          options[field_spec[:name]] = Collmex::Api.parse_field(data[index], field_spec[:type])
         end
       end
     elsif Hash === data
       data.each do |name, value|
-        raise ArgumentError.new("Undefined field (#{name} in #{self.class})") unless hash.key? name
-        spec = self.send(name)
-        raise ArgumentError.new("Cannot override constant! (#{name} in #{self.class})") if spec.key? :const
-        hash[name] = Collmex::Api.parse_field(value, spec[:type])
+        field_spec = self.send(name)
+        raise ArgumentError.new("Undefined field (#{name} in #{self.class})") unless options.key? name
+        validate_assignment! name, value, field_spec
+        options[name] = Collmex::Api.parse_field(value, field_spec[:type])
       end
     end
-    hash
+    options
   end
 
   def self.subclasses
@@ -49,6 +49,15 @@ class Collmex::Api::Line
   def self.method_missing(m, *args, &block)
     super if args.size > 0 or block_given?
     specification.find{|x| x[:name] == m} || super
+  end
+
+  def self.assignment_valid? name, value, spec = nil
+    spec ||= self.send(name)
+    !spec.key? :const or spec[:const] == value
+  end
+
+  def self.validate_assignment! name, value, spec = nil
+    raise ArgumentError.new("Cannot override constant! (#{name} in #{self})") unless assignment_valid? name, value, spec
   end
 
   def valid?
@@ -109,7 +118,7 @@ class Collmex::Api::Line
     raise ArgumentError.new("wrong number of arguments (#{args.size} for #{args_should})") if args_should != args.size
 
     if assignment
-      raise ArgumentError.new("Cannot assign to const field (#{field})") if self.class.send(field).key? :const
+      self.class.validate_assignment! field, args.first
       @hash[field] = args.first
     else
       @hash[field]
