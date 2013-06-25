@@ -1,5 +1,6 @@
 patch 'Cmxinv' do
-  #self::NEU to have access from inside Cmxinv
+  menge[:default] = 1
+  kundennummer[:required] = true
 
   NEU = 0
   ZU_BUCHEN = 10
