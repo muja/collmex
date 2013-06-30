@@ -20,6 +20,7 @@ class Collmex::Request
     else
       return false
     end
+    self
   end
 
   def initialize

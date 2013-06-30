@@ -4,8 +4,8 @@ module Collmex
     attr_accessor :benutzer, :passwort, :kundennummer
 
     def setup_login_data(logindata)
-      Collmex.benutzer    = logindata[:benutzer]
-      Collmex.passwort    = logindata[:passwort]
+      Collmex.benutzer     = logindata[:benutzer]
+      Collmex.passwort     = logindata[:passwort]
       Collmex.kundennummer = logindata[:kundennummer]
     end
 
