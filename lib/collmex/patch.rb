@@ -37,9 +37,15 @@ class Collmex::Patch
   end
 
   def self.apply_patches
+
+    puts "Patching collmex..."
     dir = File.expand_path("../patch", __FILE__)
 
-    Dir.entries(dir).each do |file|
+    global = File.join(dir, "_global.rb");
+
+    class_eval File.read(global), global
+
+    (Dir.entries(dir) - ["_global.rb"]).each do |file|
       next unless file.end_with? ".rb"
       rb = File.join(dir, file)
       class_eval File.read(rb), rb
