@@ -1,6 +1,7 @@
 require "net/http"
 require "uri"
 
+
 class Collmex::Request
   attr_reader :response
   attr_accessor :commands, :http
@@ -51,6 +52,10 @@ class Collmex::Request
   end
 
   def execute
+    execute_raw(payload)
+  end
+
+  def execute_raw csv
     valid_commands = @commands.take_while(&:valid?)
     raise "A " << @commands[valid_commands.size].class << " request is not valid." if valid_commands.size != @commands.size # Some command isn't valid
     @http = Net::HTTP.new(Collmex::Request.uri.host, Collmex::Request.uri.port)
@@ -58,7 +63,8 @@ class Collmex::Request
     @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
     # http://www.collmex.de/faq.html#zeichensatz_import
-    encoded_body = payload.encode("ISO-8859-1", undef: :replace) # Do not blow up on undefined characters in ISO-8859-1
+
+    encoded_body = csv.encode("ISO-8859-1", undef: :replace)    
     response = @http.request_post(Collmex::Request.uri.request_uri, encoded_body, Collmex::Request.header_attributes)
     response.body.force_encoding("ISO-8859-1") if response.body.encoding.to_s == "ASCII-8BIT"
 

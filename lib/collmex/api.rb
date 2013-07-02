@@ -30,11 +30,11 @@ module Collmex::Api
   def self.parse_line(line)
     # in case the line is already an array
     if Array === line && String === line.first || String === line && line = CSV.parse_line(line, Collmex.csv_opts)
-      identifier = line.first.split(/_|-/).map(&:capitalize).join
-      if self.line_class_exists?(identifier)
-        Collmex::Api.const_get(identifier).new(line)
+      satzart = line.first.split(/_|-/).map(&:capitalize).join
+      if self.line_class_exists?(satzart)
+        Collmex::Api.const_get(satzart).new(line)
       else
-        raise "Could not find a Collmex::Api::Line class for \"#{identifier}\" (\"#{line.first}\")"
+        raise "Could not find a Collmex::Api::Line class for \"#{satzart}\" (\"#{line.first}\")"
       end
     else
       raise "Could not parse the given line"
@@ -43,15 +43,24 @@ module Collmex::Api
 
   # Given a field's content, we parse it here and return
   # a typecasted object
-  def self.parse_field(value, type, opts = nil)
-    return nil if value.nil?
+  def self.parse_field(value, type)
     case type
-      when :string    then value.to_s
-      when :date      then Date.parse(value.to_s)
-      when :int_arr   then value.split(",").map{|i| i.to_i}
-      when :integer   then value.to_i
-      when :float     then value.to_s.gsub(',','.').to_f
-      when :currency  then Collmex::Api.parse_currency(value)
+    when :int_arr
+      if value.nil?
+        []
+      else
+        value.split(",").map(&:to_i)
+      end
+    when :string
+      value.to_s
+    when :date
+      Date.parse(value.to_s) unless value.nil?
+    when :integer
+      value.to_i unless value.nil?
+    when :float
+      value.to_s.gsub(',','.').to_f unless value.nil?
+    when :currency
+      Collmex::Api.parse_currency(value) unless value.nil?
     end
   end
 

@@ -27,14 +27,14 @@ class Collmex::Api::Line
     spec = specification
     if Array === data || String === data && data = CSV.parse_line(data, Collmex.csv_opts)
       spec.each_with_index do |field_spec, index|
-        if data[index] and not field_spec.has_key? :const
+        unless field_spec.has_key? :const
           options[field_spec[:name]] = Collmex::Api.parse_field(data[index], field_spec[:type])
         end
       end
     elsif Hash === data
       data.each do |name, value|
         field_spec = self.send(name)
-        raise ArgumentError.new("Undefined field (#{name} in #{self.class})") unless options.key? name
+        raise ArgumentError.new("Undefined field (#{name} in #{self})") unless options.key? name
         validate_assignment! name, value, field_spec
         options[name] = Collmex::Api.parse_field(value, field_spec[:type])
       end
