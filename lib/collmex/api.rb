@@ -52,7 +52,7 @@ module Collmex::Api
         value.split(",").map(&:to_i)
       end
     when :string
-      value.to_s
+      value.to_s unless value.nil?
     when :date
       Date.parse(value.to_s) unless value.nil?
     when :integer
