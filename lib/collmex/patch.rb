@@ -13,7 +13,12 @@ class Collmex::Patch
       begin
         @current_class.send(*args, &block)
       rescue ::NameError
-        {}
+        return Dummy.new
+      end
+    end
+
+    class Dummy < GlobalPatch
+      def method_missing(*args, &block)
       end
     end
   end
@@ -37,8 +42,6 @@ class Collmex::Patch
   end
 
   def self.apply_patches
-
-    puts "Patching collmex..."
     dir = File.expand_path("../patch", __FILE__)
 
     global = File.join(dir, "_global.rb");
