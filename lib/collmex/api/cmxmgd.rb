@@ -9,7 +9,7 @@ class Collmex::Api::Cmxmgd < Collmex::Api::Line
   { name: :name, type: :string },
   { name: :firma, type: :string },
   { name: :abteilung, type: :string },
-  { name: :straße, type: :string },
+  { name: :strasse, type: :string },
   { name: :plz, type: :string },
   { name: :ort, type: :string },
   { name: :reserviert, type: :string },
