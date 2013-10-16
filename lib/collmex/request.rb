@@ -40,7 +40,7 @@ class Collmex::Request
   end
 
   def self.uri
-    URI.parse "https://www.collmex.de/cgi-bin/cgi.exe\?#{Collmex.kundennummer},0,data_exchange"
+    URI.parse "https://www.collmex4.de/cgi-bin/cgi.exe\?#{Collmex.kundennummer},0,data_exchange"
   end
 
   def self.header_attributes
@@ -74,8 +74,9 @@ class Collmex::Request
 
     begin
       raw_response[:array] = CSV.parse(raw_response[:string], Collmex.csv_opts)
-    rescue
-      raise "CSV.parse failed with string: #{raw_response[:string]}"
+    rescue => e
+      $stderr.puts "CSV.parse failed with string: #{raw_response[:string]}"
+      raise e
     end
 
     @response = Collmex::Response.parse_response(raw_response)

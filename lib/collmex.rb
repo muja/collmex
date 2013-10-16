@@ -17,7 +17,7 @@ module Collmex
 
     def csv_opts
       {
-        :col_sep => ";"
+        col_sep: ";"
       }
     end
 

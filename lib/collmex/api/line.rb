@@ -104,14 +104,14 @@ class Collmex::Api::Line
     to_csv.chomp
   end
 
-  def method_missing(m, *args, &block)
+  def method_missing(meth, *args, &block)
     super if block_given?
 
-    field = m.to_s.split("=").first.to_sym
+    field = meth.to_s.split("=").first.to_sym
 
     super unless @hash.key? field
 
-    assignment = m.to_s.end_with? '='
+    assignment = meth.to_s.end_with? '='
 
     args_should = assignment ? 1 : 0
 
