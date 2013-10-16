@@ -70,7 +70,7 @@ class Collmex::Request
 
     raw_response = {}
 
-    raw_response[:string] = response.body.encode("UTF-8")
+    raw_response[:string] = response.body.encode("UTF-8").gsub("\r", "")
 
     begin
       raw_response[:array] = CSV.parse(raw_response[:string], Collmex.csv_opts)
