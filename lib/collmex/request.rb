@@ -40,7 +40,7 @@ class Collmex::Request
   end
 
   def self.uri
-    URI.parse "https://www.collmex4.de/cgi-bin/cgi.exe\?#{Collmex.kundennummer},0,data_exchange"
+    URI.parse "https://www.collmex.de/cgi-bin/cgi.exe\?#{Collmex.kundennummer},0,data_exchange"
   end
 
   def self.header_attributes
