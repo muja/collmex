@@ -1,5 +1,8 @@
 class Collmex::Patch
 
+  # The global patch is used for wildcard ("*") patches.
+  # It will evaluate the given block for every Line class.
+  # It silently ignores any missing methods for classes that don't respond to them.
   class GlobalPatch < BasicObject
     def __patch__(klass, &block)
       @current_class = klass
@@ -13,6 +16,7 @@ class Collmex::Patch
       begin
         @current_class.send(*args, &block)
       rescue ::NameError
+        # return a Dummy that silently ignores missing methods for chained calls
         return Dummy.new
       end
     end
