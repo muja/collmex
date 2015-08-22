@@ -43,7 +43,11 @@ class Collmex::Api::Line
   end
 
   def self.subclasses
-    Collmex::Api.constants.map{|x| Collmex::Api.const_get(x)}.select{|x| x.is_a? Class and x.superclass == self}
+    @subclasses ||= Collmex::Api.constants.map do |x|
+      Collmex::Api.const_get(x)
+    end.select do |x|
+      x.is_a?(Class) && x.superclass == self
+    end
   end
 
   def self.method_missing(m, *args, &block)

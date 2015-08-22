@@ -56,8 +56,8 @@ class Collmex::Request
   end
 
   def execute_raw csv
-    valid_commands = @commands.take_while(&:valid?)
-    raise "A " << @commands[valid_commands.size].class << " request is not valid." if valid_commands.size != @commands.size # Some command isn't valid
+    invalid_commands = @commands.reject(&:valid?)
+    raise "Invalid commands: #{invalid_commands.map(&:class)}" if invalid_commands.size > 0
     @http = Net::HTTP.new(Collmex::Request.uri.host, Collmex::Request.uri.port)
     @http.use_ssl = true
     @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
